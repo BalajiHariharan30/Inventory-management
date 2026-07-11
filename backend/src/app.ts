@@ -18,13 +18,17 @@ app.use(
   })
 );
 
+import fs from 'fs';
 import path from 'path';
 
 // application routes
 app.use('/api/v1', rootRouter);
 
 // Serve static files from the React frontend build
-const frontendBuildPath = path.join(__dirname, '../../frontend/dist');
+const frontendBuildPath = fs.existsSync(path.join(__dirname, './frontend-dist'))
+  ? path.join(__dirname, './frontend-dist')
+  : path.join(__dirname, '../dist/frontend-dist');
+
 app.use(express.static(frontendBuildPath));
 
 // Fallback all other routes to React router index.html
