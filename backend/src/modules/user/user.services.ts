@@ -4,7 +4,7 @@ import generateToken from '../../utils/generateToken';
 import { IUser } from './user.interface';
 import User from './user.model';
 import verifyPassword from '../../utils/verifyPassword';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 class UserServices {
   private model = User;

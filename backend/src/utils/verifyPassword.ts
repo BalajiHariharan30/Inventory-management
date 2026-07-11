@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import CustomError from '../errors/customError';
 
 const verifyPassword = async (password: string, hashedPassword: string) => {
