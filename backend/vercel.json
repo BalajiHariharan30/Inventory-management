@@ -8,8 +8,17 @@
   ],
   "routes": [
     {
+      "src": "/api/v1/(.*)",
+      "dest": "src/server.ts"
+    },
+    {
       "src": "/(.*)",
       "dest": "src/server.ts"
     }
-  ]
+  ],
+  "functions": {
+    "src/server.ts": {
+      "includeFiles": "../frontend/dist/**"
+    }
+  }
 }
