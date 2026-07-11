@@ -11,7 +11,11 @@ class UserServices {
 
   // get profile
   async getSelf(userId: string) {
-    return this.model.findById(userId);
+    const user = await this.model.findById(userId);
+    if (!user) {
+      throw new CustomError(httpStatus.UNAUTHORIZED, 'User record not found. Please log in again.');
+    }
+    return user;
   }
   // register new user
   async register(payload: IUser) {

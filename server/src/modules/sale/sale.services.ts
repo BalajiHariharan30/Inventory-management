@@ -235,6 +235,42 @@ class SaleServices extends BaseServices<any> {
       select: '-createdAt -updatedAt -__v'
     });
   }
+
+  /**
+   * Delete sale and restore product stock
+   */
+  async delete(id: string) {
+    await this._isExists(id);
+    const sale = await this.model.findById(id);
+    if (sale) {
+      await Product.findByIdAndUpdate(sale.product, { $inc: { stock: sale.quantity } });
+    }
+    return this.model.findByIdAndDelete(id);
+  }
+
+  /**
+   * Update sale and adjust product stock
+   */
+  async update(id: string, payload: any) {
+    await this._isExists(id);
+    const sale = await this.model.findById(id);
+    if (!sale) {
+      throw new CustomError(404, 'Sale not found');
+    }
+
+    if (payload.quantity !== undefined && payload.quantity !== sale.quantity) {
+      const diff = payload.quantity - sale.quantity;
+      if (diff > 0) {
+        const product = await Product.findById(sale.product);
+        if (!product || diff > product.stock) {
+          throw new CustomError(400, `${diff} more items are not available in stock!`);
+        }
+      }
+      await Product.findByIdAndUpdate(sale.product, { $inc: { stock: -diff } });
+    }
+
+    return this.model.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+  }
 }
 
 const saleServices = new SaleServices(Sale, 'modelName');

@@ -1,163 +1,449 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #818cf8;
+  --primary-hover: #6366f1;
+  --primary-light: rgba(129, 140, 248, 0.12);
+  --secondary: #09090b;
+  --secondary-light: #18181b;
+  --accent: #10b981;
+  --accent-light: rgba(16, 185, 129, 0.12);
+  --bg-main: #09090b;
+  --bg-card: rgba(24, 24, 27, 0.55);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-main: #e4e4e7;
+  --text-title: #ffffff;
+  --text-muted: #a1a1aa;
+  --danger: #f43f5e;
+  --danger-hover: #e11d48;
+  --warning: #fbbf24;
+  --warning-light: rgba(251, 191, 36, 0.12);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Outfit', sans-serif !important;
 }
 
 body {
-  background-color: #BBE1FA;
-  font-family: 'Nunito', sans-serif !important;
+  background: linear-gradient(135deg, #09090b 0%, #030712 50%, #0f172a 100%);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-.input-field {
-  width: 100%;
-  outline: none;
-  padding: .5rem;
-  border-radius: 6px;
-  border: 1px solid gray;
-  margin-bottom: .5rem;
-}
-
-.input-field-error {
-  border: 1px solid red;
-}
-
-li.ant-menu-item {
-  padding: 0 .8rem !important;
-}
-
-.label {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-/* width */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px #E4E4E4;
-  border-radius: 10px;
+  background: #030712;
 }
 
-/* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #FF6565;
-  border-radius: 10px;
+  background: #1e1b4b;
+  border-radius: var(--radius-sm);
+  border: 2px solid #030712;
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #FF6565;
+  background: var(--primary);
 }
 
+/* Custom Table Styles in Dark Glass Theme */
+.custom-table-container {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  margin-top: 1rem;
+  backdrop-filter: blur(10px);
+}
 
 .custom-table {
   width: 100%;
-  font-size: 16px;
-  text-align: center;
-  font-size: .9rem;
+  border-collapse: collapse;
+  text-align: left;
 }
 
 .custom-table th {
-  background-color: #f2f2f2;
-  padding: 6px;
-  font-weight: bold;
-  border: 1px solid #ddd;
+  background-color: rgba(9, 9, 11, 0.7) !important;
+  color: var(--text-title) !important;
+  padding: 14px 16px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
 }
 
-.custom-table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
+.custom-table tbody tr {
+  transition: all 200ms ease;
+  border-bottom: 1px solid var(--border-color);
+  background-color: transparent;
 }
 
-
-.custom-table td {
-  padding: 4px;
-  border-bottom: 1px solid #ddd;
+.custom-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .custom-table tbody tr:hover {
-  background-color: #e0e0e0;
+  background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
-.query-filter {
-  width: 75%;
+.custom-table td {
+  padding: 14px 16px;
+  font-size: 0.875rem;
+  color: var(--text-main) !important;
+  vertical-align: middle;
+  border: none;
 }
 
-.query-filter label {
-  font-weight: 700;
+/* Ant Design Table Theme Overrides */
+.ant-table {
+  background: transparent !important;
+  color: var(--text-main) !important;
 }
 
-.sales {
-  padding: .6rem 2rem 2rem 2rem;
-  margin: .2rem;
-  border: 1px solid #000;
-  border-radius: 1rem;
+.ant-table-thead > tr > th {
+  background: rgba(9, 9, 11, 0.6) !important;
+  color: var(--text-title) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  font-weight: 600 !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.ant-table-placeholder {
+  background: transparent !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.ant-empty-description {
+  color: var(--text-muted) !important;
+}
+
+/* Custom Input Styles */
+.input-field {
   width: 100%;
-  overflow: auto;
+  outline: none;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: rgba(9, 9, 11, 0.5) !important;
+  color: #ffffff !important;
+  font-size: 0.875rem;
+  transition: all 200ms ease;
+  margin-bottom: 0.75rem;
 }
 
-.number-card {
-  width: 100%;
-  margin: .5rem;
-  min-height: 150px;
-  border-radius: 1rem;
-  border: 1px solid gray;
-  text-align: center;
+.input-field:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25) !important;
+}
+
+select.input-field {
+  background-color: rgba(9, 9, 11, 0.7) !important;
+  color: #ffffff !important;
+  cursor: pointer;
+}
+
+select.input-field option {
+  background-color: #09090b !important;
+  color: #ffffff !important;
+}
+
+.input-field-error {
+  border-color: var(--danger) !important;
+}
+
+.input-field-error:focus {
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.25) !important;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-title);
+  margin-bottom: 0.375rem;
+}
+
+/* Ant Design Menu Customizations */
+li.ant-menu-item {
+  border-radius: var(--radius-md) !important;
+  margin: 4px 8px !important;
+  padding: 0 12px !important;
+  transition: all 200ms ease !important;
+}
+
+li.ant-menu-item-selected {
+  background-color: var(--primary-hover) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+}
+
+.ant-layout-sider-children {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  height: 100%;
+}
+
+/* Premium KPI Metrics Cards with Glow Borders */
+.number-card {
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  background: rgba(30, 41, 59, 0.35);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+.number-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px rgba(129, 140, 248, 0.2);
+  border-color: rgba(129, 140, 248, 0.3);
 }
 
 .number-card h3 {
-  font-size: 1.4rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
 }
 
 .number-card h1 {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-title);
+  line-height: 1;
 }
 
-.update-sale-modal {
-  border: 1px solid gray;
-  padding: 2rem;
-  border-radius: 1rem;
-}
-
-.bulk-delete-btn {
-  padding: '0 .3rem';
-  height: '25px';
-  background-color: red !important;
-  opacity: .7;
-  transition: all 300ms;
-  color: '#fff'
-}
-
-.bulk-delete-btn:hover {
-  opacity: 1;
-  background-color: red !important;
-  color: #e0e0e0;
-}
-
-.bulk-delete-btn:disabled {
-  background-color: gray !important;
-  color: #e0e0e0;
+/* Table action buttons */
+.table-btn {
+  border-radius: var(--radius-md);
+  height: 36px;
+  padding: 0 1rem;
+  margin-right: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  transition: all 200ms ease;
+  border: none;
+  cursor: pointer;
 }
 
 .table-btn-small {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
   padding: 0;
-  margin-right: .2rem;
+  margin-right: 0.375rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms ease;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
 }
 
-.table-btn {
-  border-radius: 6px;
-  height: 30px;
-  padding: 0 .5rem;
-  margin-right: .2rem;
+.table-btn-small:hover {
+  transform: scale(1.05);
+}
+
+.bulk-delete-btn {
+  background-color: var(--danger) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-md) !important;
   font-weight: 600;
+  border: none;
+  transition: all 200ms ease;
+}
+
+.bulk-delete-btn:hover:not(:disabled) {
+  background-color: var(--danger-hover) !important;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.3);
+}
+
+.bulk-delete-btn:disabled {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-color) !important;
+  cursor: not-allowed;
+}
+
+/* Ant Design Card Override in Dark Theme */
+.ant-card {
+  background: rgba(30, 41, 59, 0.25) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+.ant-card-head {
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-title) !important;
+}
+
+.ant-card-head-title {
+  color: var(--text-title) !important;
+  font-weight: 700 !important;
+}
+
+/* Ant Design Modal Override in Dark Theme */
+.ant-modal-content {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+  color: var(--text-main) !important;
+}
+
+.ant-modal-header {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding-bottom: 0.75rem !important;
+}
+
+.ant-modal-title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--text-title) !important;
+}
+
+.ant-modal-close-icon {
+  color: var(--text-muted) !important;
+}
+
+.ant-modal-close-icon:hover {
+  color: #ffffff !important;
+}
+
+/* Alert styles */
+.low-stock-alert-container {
+  margin: 1rem 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  background-color: rgba(244, 63, 94, 0.06);
+  padding: 1rem;
+}
+
+.low-stock-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.low-stock-item:last-child {
+  border-bottom: none;
+}
+
+/* Invoice generator visual styling */
+.invoice-card {
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  color: #0f172a;
+  font-family: 'Courier New', Courier, monospace !important;
+}
+
+/* Pagination Overrides for Dark Mode */
+.ant-pagination-item {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: var(--border-color) !important;
+}
+
+.ant-pagination-item a {
+  color: var(--text-main) !important;
+}
+
+.ant-pagination-item-active {
+  border-color: var(--primary) !important;
+  background-color: var(--primary-light) !important;
+}
+
+.ant-pagination-item-active a {
+  color: var(--primary) !important;
+}
+
+.ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination-next .ant-pagination-item-link {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+/* Auth Cards Styling */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1e1b4b 0%, #030712 100%);
+  padding: 1.5rem;
+}
+
+.auth-card {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--text-title);
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.05em;
+  background: linear-gradient(to right, #818cf8, #c084fc);
+  WebkitBackgroundClip: text;
+  WebkitTextFillColor: transparent;
+}
+
+.auth-subtitle {
+  font-size: 0.875rem;
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
 }

@@ -1,4 +1,4 @@
-import { Button, Flex } from 'antd';
+import { Button } from 'antd';
 import { FieldValues, useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import toastMessage from '../../lib/toastMessage';
@@ -19,17 +19,14 @@ const RegisterPage = () => {
   } = useForm();
 
   const onSubmit = async (data: FieldValues) => {
+    if (data.password !== data.confirmPassword) {
+      toastMessage({ icon: 'error', text: 'Password and confirm password must be the same!' });
+      return;
+    }
 
-
-    const toastId = toast.loading('Registering new account!');
+    const toastId = toast.loading('Registering your account...');
     try {
-      console.log(data);
       const res = await userRegistration(data).unwrap();
-      console.log(res.message)
-      if (data.password !== data.confirmPassword) {
-        toastMessage({ icon: 'error', text: 'Password and confirm password must be same!' });
-        return;
-      }
       if (res.statusCode === 201) {
         const user = decodeToken(res.data.token);
         dispatch(loginUser({ token: res.data.token, user }));
@@ -37,66 +34,89 @@ const RegisterPage = () => {
         toast.success(res.message, { id: toastId });
       }
     } catch (error: any) {
-      // console.log(error.data);
-
-      toastMessage({ icon: 'error', text: error?.data?.message });
+      toast.error(error?.data?.message || 'Registration failed.', { id: toastId });
     }
   };
 
   return (
-    <Flex justify='center' align='center' style={{ height: '100vh' }}>
-      <Flex
-        vertical
-        style={{
-          width: '400px',
-          padding: '3rem',
-          border: '1px solid #164863',
-          borderRadius: '.6rem',
-        }}
-      >
-        <h1 style={{ marginBottom: '.7rem', textAlign: 'center', textTransform: 'uppercase' }}>
-          Register
-        </h1>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <span style={{ fontSize: '2.5rem' }}>⚡</span>
+          <h1 className="auth-title">STOCKFLOW</h1>
+          <p className="auth-subtitle">Create your manager account</p>
+        </div>
+
         <form onSubmit={handleSubmit(onSubmit)}>
-          <input
-            type='text'
-            {...register('name', { required: true })}
-            placeholder='Your Name*'
-            className={`input-field ${errors['name'] ? 'input-field-error' : ''}`}
-          />
-          <input
-            type='text'
-            {...register('email', { required: true })}
-            placeholder='Your Email*'
-            className={`input-field ${errors['email'] ? 'input-field-error' : ''}`}
-          />
-          <input
-            type='password'
-            placeholder='Your Password*'
-            {...register('password', { required: true })}
-            className={`input-field ${errors['password'] ? 'input-field-error' : ''}`}
-          />
-          <input
-            type='password'
-            placeholder='Confirm Password*'
-            {...register('confirmPassword', { required: true })}
-            className={`input-field ${errors['confirmPassword'] ? 'input-field-error' : ''}`}
-          />
-          <Flex justify='center'>
-            <Button
-              htmlType='submit'
-              type='primary'
-              style={{ textTransform: 'uppercase', fontWeight: 'bold' }}
-            >
-              Register
-            </Button>
-          </Flex>
+          <div style={{ marginBottom: '0.75rem' }}>
+            <label className="label">Full Name</label>
+            <input
+              type="text"
+              {...register('name', { required: true })}
+              placeholder="Enter your name"
+              className={`input-field ${errors['name'] ? 'input-field-error' : ''}`}
+              style={{ marginBottom: 0 }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '0.75rem' }}>
+            <label className="label">Email Address</label>
+            <input
+              type="text"
+              {...register('email', { required: true })}
+              placeholder="Enter email address"
+              className={`input-field ${errors['email'] ? 'input-field-error' : ''}`}
+              style={{ marginBottom: 0 }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '0.75rem' }}>
+            <label className="label">Password</label>
+            <input
+              type="password"
+              placeholder="Create password"
+              {...register('password', { required: true })}
+              className={`input-field ${errors['password'] ? 'input-field-error' : ''}`}
+              style={{ marginBottom: 0 }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label className="label">Confirm Password</label>
+            <input
+              type="password"
+              placeholder="Verify password"
+              {...register('confirmPassword', { required: true })}
+              className={`input-field ${errors['confirmPassword'] ? 'input-field-error' : ''}`}
+              style={{ marginBottom: 0 }}
+            />
+          </div>
+
+          <Button
+            htmlType="submit"
+            type="primary"
+            style={{
+              width: '100%',
+              height: '42px',
+              backgroundColor: 'var(--primary)',
+              borderColor: 'var(--primary)',
+              fontWeight: 600,
+              fontSize: '1rem',
+              borderRadius: '6px',
+            }}
+          >
+            Register Account
+          </Button>
         </form>
-        <p style={{ marginTop: '1rem' }}>
-          Already have an account? <Link to='/login'>Login Here</Link>
+
+        <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+          Already have an account?{' '}
+          <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+            Login here
+          </Link>
         </p>
-      </Flex>
-    </Flex>
+      </div>
+    </div>
   );
 };
 

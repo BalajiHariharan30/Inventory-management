@@ -1,14 +1,19 @@
-import { DeleteFilled, EditFilled } from '@ant-design/icons';
+import { DeleteFilled, EditFilled, FileTextOutlined, DownloadOutlined } from '@ant-design/icons';
 import type { PaginationProps, TableColumnsType } from 'antd';
-import { Button, Flex, Modal, Pagination, Table } from 'antd';
+import { Button, Flex, Modal, Pagination, Table, Space, Tooltip } from 'antd';
 import { useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import SearchInput from '../../components/SearchInput';
+import CustomInput from '../../components/CustomInput';
 import toastMessage from '../../lib/toastMessage';
-import { useDeleteSaleMutation, useGetAllSaleQuery } from '../../redux/features/management/saleApi';
-import { IProduct } from '../../types/product.types';
+import {
+  useDeleteSaleMutation,
+  useGetAllSaleQuery,
+  useUpdateSaleMutation,
+} from '../../redux/features/management/saleApi';
 import { ITableSale } from '../../types/sale.type';
 import formatDate from '../../utils/formatDate';
+import { exportToCSV, exportToJSON } from '../../utils/exportData';
 
 const SaleManagementPage = () => {
   const [query, setQuery] = useState({
@@ -23,6 +28,25 @@ const SaleManagementPage = () => {
     setQuery((prev) => ({ ...prev, page: page }));
   };
 
+  const handleExportCSV = () => {
+    if (!data?.data) return;
+    const exportData = data.data.map((sale: ITableSale) => ({
+      'Sale ID': sale._id,
+      'Product Name': sale.productName,
+      'Product Price': sale.productPrice,
+      'Buyer Name': sale.buyerName,
+      'Quantity': sale.quantity,
+      'Total Price': sale.totalPrice,
+      'Selling Date': formatDate(sale.date),
+    }));
+    exportToCSV(exportData, 'sales_history');
+  };
+
+  const handleExportJSON = () => {
+    if (!data?.data) return;
+    exportToJSON(data.data, 'sales_history');
+  };
+
   const tableData = data?.data?.map((sale: ITableSale) => ({
     key: sale._id,
     productName: sale.productName,
@@ -31,6 +55,7 @@ const SaleManagementPage = () => {
     quantity: sale.quantity,
     totalPrice: sale.totalPrice,
     date: formatDate(sale.date),
+    rawDate: sale.date,
   }));
 
   const columns: TableColumnsType<any> = [
@@ -44,6 +69,7 @@ const SaleManagementPage = () => {
       key: 'productPrice',
       dataIndex: 'productPrice',
       align: 'center',
+      render: (price: number) => `₹${price.toLocaleString('en-IN')}`,
     },
     {
       title: 'Buyer Name',
@@ -62,6 +88,7 @@ const SaleManagementPage = () => {
       key: 'totalPrice',
       dataIndex: 'totalPrice',
       align: 'center',
+      render: (total: number) => `₹${total.toLocaleString('en-IN')}`,
     },
     {
       title: 'Selling Date',
@@ -75,37 +102,44 @@ const SaleManagementPage = () => {
       align: 'center',
       render: (item) => {
         return (
-          <div style={{ display: 'flex' }}>
-            <UpdateModal product={item} />
+          <Space size="small">
+            <InvoiceModal sale={item} />
+            <UpdateModal sale={item} />
             <DeleteModal id={item.key} />
-          </div>
+          </Space>
         );
       },
       width: '1%',
     },
   ];
 
-  // const onDateChange: DatePickerProps['onChange'] = (_date, dateString) => {
-  //   setDate(dateString as string);
-  // };
-
   return (
-    <>
-      <Flex justify='end' style={{ margin: '5px', gap: 4 }}>
-        {/* <DatePicker
-          onChange={onDateChange}
-          placeholder='Search by Selling date...'
-          style={{ minWidth: '250px' }}
-        /> */}
-        <SearchInput setQuery={setQuery} placeholder='Search Sold Products...' />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Flex justify='space-between' align='center' style={{ flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-title)' }}>Sales History</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Track, modify, and review product sales.</p>
+        </div>
+        <Flex gap={8} style={{ flexWrap: 'wrap' }}>
+          <Button onClick={handleExportCSV} type="default" icon={<DownloadOutlined />}>
+            Export CSV
+          </Button>
+          <Button onClick={handleExportJSON} type="default">
+            Export JSON
+          </Button>
+          <SearchInput setQuery={setQuery} placeholder='Search Sold Products...' />
+        </Flex>
       </Flex>
-      <Table
-        size='small'
-        loading={isFetching}
-        columns={columns}
-        dataSource={tableData}
-        pagination={false}
-      />
+      <div className="custom-table-container">
+        <Table
+          size='middle'
+          loading={isFetching}
+          columns={columns}
+          dataSource={tableData}
+          pagination={false}
+          className="custom-table"
+        />
+      </div>
       <Flex justify='center' style={{ marginTop: '1rem' }}>
         <Pagination
           current={query.page}
@@ -114,19 +148,51 @@ const SaleManagementPage = () => {
           total={data?.meta?.total}
         />
       </Flex>
-    </>
+    </div>
   );
 };
 
 /**
- * Update Modal
+ * Update Modal (Edit Sale)
  */
-const UpdateModal = ({ product }: { product: IProduct }) => {
+const UpdateModal = ({ sale }: { sale: any }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { handleSubmit } = useForm();
+  const [updateSale] = useUpdateSaleMutation();
 
-  const onSubmit = (data: FieldValues) => {
-    console.log({ product, data });
+  const formattedDate = sale.rawDate
+    ? new Date(sale.rawDate).toISOString().split('T')[0]
+    : '';
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      buyerName: sale.buyerName,
+      quantity: sale.quantity,
+      price: sale.productPrice,
+      date: formattedDate,
+    },
+  });
+
+  const onSubmit = async (data: FieldValues) => {
+    const payload = {
+      buyerName: data.buyerName,
+      quantity: Number(data.quantity),
+      price: Number(data.price),
+      date: data.date,
+    };
+
+    try {
+      const res = await updateSale({ id: sale.key, payload }).unwrap();
+      if (res.statusCode === 200) {
+        toastMessage({ icon: 'success', text: 'Sale log updated successfully!' });
+        setIsModalOpen(false);
+      }
+    } catch (error: any) {
+      toastMessage({ icon: 'error', text: error.data?.message || 'Failed to update sale' });
+    }
   };
 
   const showModal = () => {
@@ -137,24 +203,171 @@ const UpdateModal = ({ product }: { product: IProduct }) => {
     setIsModalOpen(false);
   };
 
-  // ! Remove the first return to work on this component
-  return;
+  return (
+    <>
+      <Tooltip title="Edit Transaction">
+        <Button
+          onClick={showModal}
+          type='primary'
+          className='table-btn-small'
+          style={{ backgroundColor: 'var(--accent)' }}
+        >
+          <EditFilled />
+        </Button>
+      </Tooltip>
+      <Modal title='Update Sale Details' open={isModalOpen} onCancel={handleCancel} footer={null}>
+        <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: '1rem' }}>
+          <CustomInput
+            name='buyerName'
+            errors={errors}
+            label='Buyer Name'
+            register={register}
+            required={true}
+          />
+          <CustomInput
+            name='quantity'
+            errors={errors}
+            label='Quantity'
+            register={register}
+            required={true}
+            type='number'
+          />
+          <CustomInput
+            name='price'
+            errors={errors}
+            label='Unit Price'
+            register={register}
+            required={true}
+            type='number'
+          />
+          <CustomInput
+            name='date'
+            errors={errors}
+            label='Selling Date'
+            register={register}
+            required={true}
+            type='date'
+          />
+          <Flex justify='center' style={{ marginTop: '1.5rem' }}>
+            <Button htmlType='submit' type='primary' style={{ backgroundColor: 'var(--primary)' }}>
+              Update Record
+            </Button>
+          </Flex>
+        </form>
+      </Modal>
+    </>
+  );
+};
+
+/**
+ * Invoice Modal (Receipt Printout Viewer)
+ */
+const InvoiceModal = ({ sale }: { sale: any }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handlePrint = () => {
+    const printContent = document.getElementById(`invoice-print-${sale.key}`);
+    const printWindow = window.open('about:blank', '_blank', 'left=200,top=200,width=800,height=600');
+    
+    if (printWindow && printContent) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Receipt - #${sale.key.substring(sale.key.length - 8).toUpperCase()}</title>
+            <style>
+              body { 
+                font-family: 'Courier New', Courier, monospace; 
+                padding: 40px; 
+                color: #000; 
+                max-width: 450px;
+                margin: 0 auto;
+              }
+              .text-center { text-align: center; }
+              .dashed-line { border-bottom: 2px dashed #000; margin: 15px 0; }
+              .flex-between { display: flex; justify-content: space-between; margin-bottom: 8px; }
+              .font-bold { font-weight: bold; }
+              .header { margin-bottom: 20px; }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+            <script>
+              window.onload = function() {
+                window.print();
+                window.close();
+              }
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+    }
+  };
 
   return (
     <>
-      <Button
-        onClick={showModal}
-        type='primary'
-        className='table-btn-small'
-        style={{ backgroundColor: 'green' }}
+      <Tooltip title="View Receipt">
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          type='default'
+          className='table-btn-small'
+          style={{ backgroundColor: 'var(--primary)' }}
+        >
+          <FileTextOutlined />
+        </Button>
+      </Tooltip>
+      <Modal
+        title="View Receipt"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={[
+          <Button key="close" onClick={() => setIsModalOpen(false)}>
+            Close
+          </Button>,
+          <Button key="print" type="primary" onClick={handlePrint} style={{ backgroundColor: 'var(--primary)' }}>
+            Print Receipt
+          </Button>,
+        ]}
       >
-        <EditFilled />
-      </Button>
-      <Modal title='Update Product Info' open={isModalOpen} onCancel={handleCancel} footer={null}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <h1>Working on it...!!!</h1>
-          <Button htmlType='submit'>Submit</Button>
-        </form>
+        <div id={`invoice-print-${sale.key}`} className="invoice-card" style={{ marginTop: '1rem' }}>
+          <div className="invoice-header">
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '0 0 0.25rem 0', color: '#0f172a' }}>STOCKFLOW CORP</h2>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>WAREHOUSE & INVENTORY LOGS</p>
+          </div>
+          <div className="invoice-body">
+            <div className="invoice-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ color: '#64748b' }}>Receipt No:</span>
+              <span style={{ fontWeight: 600 }}>#${sale.key.substring(sale.key.length - 8).toUpperCase()}</span>
+            </div>
+            <div className="invoice-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ color: '#64748b' }}>Date:</span>
+              <span>${sale.date}</span>
+            </div>
+            <div style={{ borderBottom: '1px dashed #cbd5e1', margin: '0.75rem 0' }}></div>
+            <div className="invoice-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ color: '#64748b' }}>Customer:</span>
+              <span style={{ fontWeight: 600 }}>${sale.buyerName}</span>
+            </div>
+            <div className="invoice-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ color: '#64748b' }}>Product:</span>
+              <span style={{ fontWeight: 600 }}>${sale.productName}</span>
+            </div>
+            <div className="invoice-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ color: '#64748b' }}>Quantity:</span>
+              <span>${sale.quantity} units</span>
+            </div>
+            <div className="invoice-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ color: '#64748b' }}>Unit Price:</span>
+              <span>₹${sale.productPrice.toLocaleString('en-IN')}</span>
+            </div>
+          </div>
+          <div style={{ borderBottom: '2px dashed #0f172a', margin: '1rem 0' }}></div>
+          <div className="invoice-total" style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>
+            <span>TOTAL PAID:</span>
+            <span>₹${sale.totalPrice.toLocaleString('en-IN')}</span>
+          </div>
+        </div>
       </Modal>
     </>
   );
@@ -171,12 +384,12 @@ const DeleteModal = ({ id }: { id: string }) => {
     try {
       const res = await deleteSale(id).unwrap();
       if (res.statusCode === 200) {
-        toastMessage({ icon: 'success', text: res.message });
+        toastMessage({ icon: 'success', text: 'Sale transaction deleted and stock restored!' });
         handleCancel();
       }
     } catch (error: any) {
       handleCancel();
-      toastMessage({ icon: 'error', text: error.data.message });
+      toastMessage({ icon: 'error', text: error.data?.message || 'Failed to delete sale log' });
     }
   };
 
@@ -190,34 +403,37 @@ const DeleteModal = ({ id }: { id: string }) => {
 
   return (
     <>
-      <Button
-        onClick={showModal}
-        type='primary'
-        className='table-btn-small'
-        style={{ backgroundColor: 'red' }}
-      >
-        <DeleteFilled />
-      </Button>
-      <Modal title='Delete Product' open={isModalOpen} onCancel={handleCancel} footer={null}>
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <h2>Are you want to delete this product?</h2>
-          <h4>You won't be able to revert it.</h4>
+      <Tooltip title="Delete Transaction">
+        <Button
+          onClick={showModal}
+          type='primary'
+          className='table-btn-small'
+          style={{ backgroundColor: 'var(--danger)' }}
+        >
+          <DeleteFilled />
+        </Button>
+      </Tooltip>
+      <Modal title='Confirm Deletion' open={isModalOpen} onCancel={handleCancel} footer={null}>
+        <div style={{ textAlign: 'center', padding: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-title)' }}>Delete this sale transaction?</h2>
+          <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+            Warning: The product stock level will be automatically restored by the transaction amount.
+          </p>
           <div
-            style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}
+            style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem' }}
           >
             <Button
               onClick={handleCancel}
-              type='primary'
-              style={{ backgroundColor: 'lightseagreen' }}
+              type='default'
             >
               Cancel
             </Button>
             <Button
               onClick={() => handleDelete(id)}
               type='primary'
-              style={{ backgroundColor: 'red' }}
+              danger
             >
-              Yes! Delete
+              Yes, Delete Transaction
             </Button>
           </div>
         </div>

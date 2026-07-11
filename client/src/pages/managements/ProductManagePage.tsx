@@ -1,6 +1,7 @@
-import { DeleteFilled, EditFilled } from '@ant-design/icons';
+import { DeleteFilled, EditFilled, DownloadOutlined } from '@ant-design/icons';
 import type { PaginationProps, TableColumnsType } from 'antd';
 import { Button, Col, Flex, Modal, Pagination, Row, Table, Tag } from 'antd';
+import { exportToCSV, exportToJSON } from '../../utils/exportData';
 import { useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import {
@@ -99,16 +100,54 @@ const ProductManagePage = () => {
     },
   ];
 
+  const handleExportCSV = () => {
+    if (!products?.data) return;
+    const exportData = products.data.map((product: IProduct) => ({
+      'Product ID': product._id,
+      'Product Name': product.name,
+      'Category': product.category?.name || 'N/A',
+      'Price': product.price,
+      'Stock': product.stock,
+      'Seller': product.seller?.name || 'N/A',
+      'Brand': product.brand?.name || 'N/A',
+      'Size': product.size || 'N/A',
+      'Description': product.description || '',
+    }));
+    exportToCSV(exportData, 'product_inventory');
+  };
+
+  const handleExportJSON = () => {
+    if (!products?.data) return;
+    exportToJSON(products.data, 'product_inventory');
+  };
+
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Flex justify='space-between' align='center' style={{ flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-title)' }}>Product Catalog</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Manage, search, and update stock items.</p>
+        </div>
+        <Flex gap={8}>
+          <Button onClick={handleExportCSV} type="default" icon={<DownloadOutlined />}>
+            Export CSV
+          </Button>
+          <Button onClick={handleExportJSON} type="default">
+            Export JSON
+          </Button>
+        </Flex>
+      </Flex>
       <ProductManagementFilter query={query} setQuery={setQuery} />
-      <Table
-        size='small'
-        loading={isFetching}
-        columns={columns}
-        dataSource={tableData}
-        pagination={false}
-      />
+      <div className="custom-table-container">
+        <Table
+          size='middle'
+          loading={isFetching}
+          columns={columns}
+          dataSource={tableData}
+          pagination={false}
+          className="custom-table"
+        />
+      </div>
       <Flex justify='center' style={{ marginTop: '1rem' }}>
         <Pagination
           current={current}
@@ -117,7 +156,7 @@ const ProductManagePage = () => {
           total={products?.meta?.total}
         />
       </Flex>
-    </>
+    </div>
   );
 };
 

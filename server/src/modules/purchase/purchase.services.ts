@@ -41,6 +41,21 @@ class PurchaseServices extends BaseServices<any> {
 
     return { data, totalCount };
   }
+
+  /**
+   * Update purchase and adjust total price
+   */
+  async update(id: string, payload: any) {
+    await this._isExists(id);
+    const purchase = await this.model.findById(id);
+    
+    const updatedQty = payload.quantity !== undefined ? payload.quantity : purchase.quantity;
+    const updatedPrice = payload.unitPrice !== undefined ? payload.unitPrice : purchase.unitPrice;
+    
+    payload.totalPrice = updatedQty * updatedPrice;
+
+    return this.model.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+  }
 }
 
 const purchaseServices = new PurchaseServices(Purchase, 'Purchase');

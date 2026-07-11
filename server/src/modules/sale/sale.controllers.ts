@@ -126,6 +126,7 @@ class SaleControllers {
 
     restPayload.totalPrice = updatedPrice * updatedQuantity;
     restPayload.quantity = updatedQuantity;
+    restPayload.productPrice = updatedPrice;
 
     const result = await this.services.update(req.params.id, restPayload);
 

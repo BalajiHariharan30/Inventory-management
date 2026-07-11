@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 const ProfilePage = () => {
   const { data, isLoading } = useGetSelfProfileQuery(undefined);
 
-  if (isLoading) return <Loader />;
+  if (isLoading || !data?.data) return <Loader />;
 
   return (
     <>
