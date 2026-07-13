@@ -38,7 +38,7 @@ const ProductManagePage = () => {
     key: product._id,
     name: product.name,
     category: product.category,
-    categoryName: product.category.name,
+    categoryName: product.category?.name || 'Uncategorized',
     price: product.price,
     stock: product.stock,
     seller: product?.seller,
