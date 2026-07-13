@@ -18,6 +18,11 @@ app.use(
   })
 );
 
+import { dbConnectionMiddleware } from './middlewares/dbConnection';
+
+// database connection middleware
+app.use(dbConnectionMiddleware);
+
 // application routes
 app.use('/api/v1', rootRouter);
 
