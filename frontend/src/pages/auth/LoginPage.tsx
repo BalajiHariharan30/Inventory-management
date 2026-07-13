@@ -15,12 +15,7 @@ const LoginPage = () => {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      email: 'admin@stockflow.in',
-      password: 'admin123',
-    },
-  });
+  } = useForm();
 
   const onSubmit = async (data: FieldValues) => {
     const toastId = toast.loading('Authenticating user...');
