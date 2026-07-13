@@ -12,8 +12,13 @@ export const seedDatabase = async () => {
     const adminExists = await User.findOne({ email: 'admin@stockflow.in' });
     const productCount = await Product.countDocuments();
     
-    if (adminExists && adminExists.city === 'Trichy' && productCount > 0) {
-      console.log('✅ Admin account admin@stockflow.in (Trichy) and stock products already exist. Skipping seeding.');
+    if (adminExists && productCount > 0) {
+      // Force sync the admin details and password to ensure it matches 'admin123'
+      adminExists.password = 'admin123';
+      adminExists.city = 'Trichy';
+      adminExists.address = 'Trichy, Tamil Nadu, India';
+      await adminExists.save();
+      console.log('✅ Admin account admin@stockflow.in updated to Trichy with password admin123. Skipping full seed.');
       return;
     }
 
